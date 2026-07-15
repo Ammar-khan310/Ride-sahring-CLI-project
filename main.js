@@ -47,14 +47,14 @@ class Passenger extends Account {
 }
 
 class Driver extends Account {
-  constructor(id, name, phoneNumber, vehicletype) {
+  constructor(id, name, phoneNumber, vehicleType) {
     super(id, name, phoneNumber);
     const vehicleAllow = ["bike", "car", "ac-car"];
 
-    if (!vehicleAllow.includes(vehicletype)) {
+    if (!vehicleAllow.includes(vehicleType)) {
       console.log("Incorrect vehicle type.");
     }
-    this.vehicletype = vehicletype;
+    this.vehicleType = vehicleType;
     this.isAvailable = true;
   }
 }
@@ -72,7 +72,7 @@ class Ride {
       "ac-car": 150,
     };
 
-    return rates[this.driver.vehicletype] * this.distance;
+    return rates[this.driver.vehicleType] * this.distance;
   }
 }
 
@@ -87,7 +87,7 @@ class BookingSystem {
     console.log("Passenger REgistered succcessfully");
   }
 
-  Registerdriver(driver) {
+  registerDriver(driver) {
     this.driver.push(driver);
     console.log("Driver Registered succesfully");
   }
@@ -118,7 +118,7 @@ class BookingSystem {
 
     console.log(`Fare = ${fare}`);
 
-    if (Passenger.getBalance() < fare) {
+    if (passenger.getBalance() < fare) {
       console.log("Insufficient Balance.");
       return;
     }
@@ -129,6 +129,8 @@ class BookingSystem {
     driver.addFunds(fare);
 
     passenger.rideHistory.push(ride);
+
+    console.log("driver is available.");
 
     console.log("Ride Completed Successfully.");
 
@@ -141,11 +143,11 @@ const system = new BookingSystem();
 async function uber() {
   while (true) {
     console.log("Uber app");
-    console.log(`1) Registerpassenger`);
-    console.log(`2) Registerdriver`);
-    console.log(`3) addFunds`);
-    console.log(`4) deductFunds`);
-    console.log(`5) Ride`);
+    console.log(`1) Register passenger`);
+    console.log(`2) Register driver`);
+    console.log(`3) add-Funds`);
+    console.log(`4) Request ride`);
+    console.log(`5) check balance `);
     console.log(`6) Ride History`);
     console.log(`7) Exit`);
 
@@ -173,7 +175,7 @@ async function uber() {
 
         const driver = new Driver(ID, Name, PhoneNumber, vehicle);
 
-        system.Registerdriver(driver);
+        system.registerDriver(driver);
 
         break;
       }
@@ -182,10 +184,10 @@ async function uber() {
         const Passenger = system.findPassenger(Id);
         if (!Passenger) {
           console.log("Passenger not found");
+        } else {
+          const amount = Number(readline.question("Enter the amount:"));
+          Passenger.addFunds(amount);
         }
-
-        const amount = Number(readline.question("Enter the amount:"));
-        passenger.addFunds(amount);
         break;
       }
       case 4: {
@@ -204,13 +206,25 @@ async function uber() {
 
         if (!PAssenger) {
           console.log("Passenger not foiund");
+        } else {
+          console.log(`balacne: ${PAssenger.getBalance()}`);
         }
-
-        console.log(`balacne: ${Passenger.getBalance}`);
         break;
       }
       case 6:
         {
+          const rideHis = readline.question("Enter passenger id :");
+          const hist = system.findPassenger(rideHis);
+          if (hist) {
+            hist.rideHistory.forEach((ride, index) => {
+              console.log(`
+                    Driver : ${ride.driver.name}  vehicle : ${ride.driver.vehicleType}  Distance : ${ride.distance} KMs 
+                     Fare : ${ride.calculateFare()}           
+                `);
+            });
+          } else {
+            console.log("passenger not found");
+          }
         }
         break;
 
